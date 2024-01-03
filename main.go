@@ -18,12 +18,29 @@ func GetServerInfo(service *cloudantv1.CloudantV1) {
 		panic(err)
 	}
 
-	b, err := json.MarshalIndent(serverInformation, "", "  ")
+	result, err := json.MarshalIndent(serverInformation, "", "  ")
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("Server Information : ", (string)(b))
+	fmt.Println("Server Information : ", string(result))
 }
+
+func ListDBs(service *cloudantv1.CloudantV1) {
+	getAllDbsOptions := service.NewGetAllDbsOptions()
+
+	dbList, response, err := service.GetAllDbs(getAllDbsOptions)
+	if err != nil {
+		fmt.Println("Response: ", response)
+		panic(err)
+	}
+
+	result, err := json.MarshalIndent(dbList, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("DB List: ", string(result))
+}
+
 func main() {
 	fmt.Println("Basic crud operations using GoLang and CloudantDB(CouchDB)")
 	// Cloudant Connection
@@ -44,4 +61,5 @@ func main() {
 	fmt.Println("Connection to Cloudant is established!!")
 
 	GetServerInfo(service)
+	ListDBs(service)
 }

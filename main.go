@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/IBM/cloudant-go-sdk/cloudantv1"
 	"github.com/IBM/go-sdk-core/core"
@@ -45,12 +46,12 @@ func main() {
 	fmt.Println("Basic crud operations using GoLang and CloudantDB(CouchDB)")
 	// Cloudant Connection
 	authenticator := &core.IamAuthenticator{
-		ApiKey: "api_key",
+		ApiKey: os.Getenv("cloudant_api"),
 	}
 
 	service, err := cloudantv1.NewCloudantV1(
 		&cloudantv1.CloudantV1Options{
-			URL:           "auth_url",
+			URL:           os.Getenv("cloudant_authurl"),
 			Authenticator: authenticator,
 		},
 	)

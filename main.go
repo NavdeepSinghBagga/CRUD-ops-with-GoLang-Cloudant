@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/IBM/cloudant-go-sdk/cloudantv1"
 	"github.com/IBM/go-sdk-core/core"
+	"github.com/NavdeepSinghBagga/CRUD-ops-with-GoLang-Cloudant/Config"
 )
 
 func GetServerInfo(service *cloudantv1.CloudantV1) {
@@ -42,16 +42,35 @@ func ListDBs(service *cloudantv1.CloudantV1) {
 	fmt.Println("DB List: ", string(result))
 }
 
+func GetDBDetails(service *cloudantv1.CloudantV1, dbName string) {
+	getDatabaseInformationOptions := service.NewGetDatabaseInformationOptions(
+		dbName,
+	)
+
+	databaseInformation, response, err := service.GetDatabaseInformation(getDatabaseInformationOptions)
+	if err != nil {
+		fmt.Println("Response: ", response)
+		panic(err)
+	}
+
+	result, err := json.MarshalIndent(databaseInformation, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("DB Details: ", string(result))
+	fmt.Println("Total Docmunets: ", *(databaseInformation.DocCount))
+}
+
 func main() {
 	fmt.Println("Basic crud operations using GoLang and CloudantDB(CouchDB)")
 	// Cloudant Connection
 	authenticator := &core.IamAuthenticator{
-		ApiKey: os.Getenv("cloudant_api"),
+		ApiKey: Config.ApiKey,
 	}
 
 	service, err := cloudantv1.NewCloudantV1(
 		&cloudantv1.CloudantV1Options{
-			URL:           os.Getenv("cloudant_authurl"),
+			URL:           Config.AuthURL,
 			Authenticator: authenticator,
 		},
 	)
@@ -63,4 +82,5 @@ func main() {
 
 	GetServerInfo(service)
 	ListDBs(service)
+	GetDBDetails(service, Config.DbName)
 }

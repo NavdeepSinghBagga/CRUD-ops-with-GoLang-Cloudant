@@ -42,6 +42,26 @@ func ListDBs(service *cloudantv1.CloudantV1) {
 	fmt.Println("DB List: ", string(result))
 }
 
+func CreateDB(service *cloudantv1.CloudantV1, dbName string) {
+	putDatabaseOptions := service.NewPutDatabaseOptions(
+		dbName,
+	)
+	putDatabaseOptions.SetPartitioned(true)
+
+	ok, response, err := service.PutDatabase(putDatabaseOptions)
+	if err != nil {
+		fmt.Println("Response: ", response)
+		panic(err)
+	}
+
+	result, err := json.MarshalIndent(ok, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Databse Created: ", string(result))
+
+}
+
 func GetDBDetails(service *cloudantv1.CloudantV1, dbName string) {
 	getDatabaseInformationOptions := service.NewGetDatabaseInformationOptions(
 		dbName,
@@ -50,6 +70,11 @@ func GetDBDetails(service *cloudantv1.CloudantV1, dbName string) {
 	databaseInformation, response, err := service.GetDatabaseInformation(getDatabaseInformationOptions)
 	if err != nil {
 		fmt.Println("Response: ", response)
+		if response.StatusCode == http.StatusNotFound {
+			fmt.Println("Database not found, creating the database!!")
+			CreateDB(service, dbName)
+			return
+		}
 		panic(err)
 	}
 

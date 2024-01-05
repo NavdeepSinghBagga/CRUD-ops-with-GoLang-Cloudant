@@ -86,6 +86,56 @@ func GetDBDetails(service *cloudantv1.CloudantV1, dbName string) {
 	fmt.Println("Total Docmunets: ", *(databaseInformation.DocCount))
 }
 
+func GetDBChangeInfo(service *cloudantv1.CloudantV1, dbName string) {
+	postChangesOptions := service.NewPostChangesOptions(
+		dbName,
+	)
+
+	changesResult, response, err := service.PostChanges(postChangesOptions)
+	if err != nil {
+		fmt.Println("Response: ", response)
+		panic(err)
+	}
+
+	result, err := json.MarshalIndent(changesResult, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("DB Changes info: ", string(result))
+
+}
+
+func CreateDoc(service *cloudantv1.CloudantV1, dbName string) {
+	newDoc := cloudantv1.Document{
+		ID: core.StringPtr(dbName + "7:id123"),
+	}
+	newDoc.SetProperty("name", "name123")
+	// newDoc.SetProperty("productid", "1000042")
+	// newDoc.SetProperty("brand", "Salter")
+	// newDoc.SetProperty("name", "Digital Kitchen Scales")
+	// newDoc.SetProperty("description", "Slim Colourful Design Electronic Cooking Appliance for Home / Kitchen, Weigh up to 5kg + Aquatronic for Liquids ml + fl. oz. 15Yr Guarantee - Green")
+	// newDoc.SetProperty("price", 14.99)
+	// newDoc.SetProperty("image", "assets/img/0gmsnghhew.jpg")
+
+	postDocumentOptions := service.NewPostDocumentOptions(
+		dbName,
+	)
+	postDocumentOptions.SetDocument(&newDoc)
+
+	documentResult, response, err := service.PostDocument(postDocumentOptions)
+	if err != nil {
+		fmt.Println("Response: ", response)
+		panic(err)
+	}
+
+	result, err := json.MarshalIndent(documentResult, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("New Document Created: ", string(result))
+
+}
+
 func main() {
 	fmt.Println("Basic crud operations using GoLang and CloudantDB(CouchDB)")
 	// Cloudant Connection
@@ -108,4 +158,7 @@ func main() {
 	GetServerInfo(service)
 	ListDBs(service)
 	GetDBDetails(service, Config.DbName)
+	GetDBChangeInfo(service, Config.DbName) // may use later
+
+	CreateDoc(service, Config.DbName)
 }

@@ -105,17 +105,45 @@ func GetDBChangeInfo(service *cloudantv1.CloudantV1, dbName string) {
 
 }
 
+func ListAllDocs(service *cloudantv1.CloudantV1, dbName string) {
+	postAllDocsOptions := service.NewPostAllDocsOptions(
+		dbName,
+	)
+	postAllDocsOptions.SetIncludeDocs(true)
+	postAllDocsOptions.SetLimit(10)
+
+	allDocsResult, response, err := service.PostAllDocs(postAllDocsOptions)
+	if err != nil {
+		fmt.Println("Response: ", response)
+		panic(err)
+	}
+
+	result, err := json.MarshalIndent(allDocsResult, "", "  ")
+	fmt.Println("All Documents: ", string(result))
+}
+
+func FindDocument(service *cloudantv1.CloudantV1, dbName string, docId string) *cloudantv1.Document {
+	getDocumentOptions := service.NewGetDocumentOptions(
+		dbName,
+		docId,
+	)
+
+	document, response, err := service.GetDocument(getDocumentOptions)
+	if err != nil {
+		fmt.Println("Response: ", response)
+		panic(err)
+	}
+
+	result, err := json.MarshalIndent(document, "", "  ")
+	fmt.Println("Document Found: ", string(result))
+	return document
+}
+
 func CreateDoc(service *cloudantv1.CloudantV1, dbName string) {
 	newDoc := cloudantv1.Document{
 		ID: core.StringPtr(dbName + "7:id123"),
 	}
 	newDoc.SetProperty("name", "name123")
-	// newDoc.SetProperty("productid", "1000042")
-	// newDoc.SetProperty("brand", "Salter")
-	// newDoc.SetProperty("name", "Digital Kitchen Scales")
-	// newDoc.SetProperty("description", "Slim Colourful Design Electronic Cooking Appliance for Home / Kitchen, Weigh up to 5kg + Aquatronic for Liquids ml + fl. oz. 15Yr Guarantee - Green")
-	// newDoc.SetProperty("price", 14.99)
-	// newDoc.SetProperty("image", "assets/img/0gmsnghhew.jpg")
 
 	postDocumentOptions := service.NewPostDocumentOptions(
 		dbName,
@@ -133,6 +161,29 @@ func CreateDoc(service *cloudantv1.CloudantV1, dbName string) {
 		panic(err)
 	}
 	fmt.Println("New Document Created: ", string(result))
+
+}
+
+func DeleteDoc(service *cloudantv1.CloudantV1, dbName string, docId string) {
+	fmt.Println("DeleteDoc")
+	document := FindDocument(service, dbName, docId)
+	deleteDocumentOptions := service.NewDeleteDocumentOptions(
+		dbName,
+		docId,
+	)
+	deleteDocumentOptions.SetRev(*document.Rev)
+
+	deleteResult, response, err := service.DeleteDocument(deleteDocumentOptions)
+	if err != nil {
+		fmt.Println("Response: ", response)
+		panic(err)
+	}
+
+	result, err := json.MarshalIndent(deleteResult, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(result))
 
 }
 
@@ -160,5 +211,8 @@ func main() {
 	GetDBDetails(service, Config.DbName)
 	GetDBChangeInfo(service, Config.DbName) // may use later
 
+	ListAllDocs(service, Config.DbName)
+	FindDocument(service, Config.DbName, Config.DbName+":id123")
 	CreateDoc(service, Config.DbName)
+	DeleteDoc(service, Config.DbName, Config.DbName+"7:id123")
 }

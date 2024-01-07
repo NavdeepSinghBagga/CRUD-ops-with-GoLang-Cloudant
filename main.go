@@ -187,6 +187,26 @@ func DeleteDoc(service *cloudantv1.CloudantV1, dbName string, docId string) {
 
 }
 
+func ModifyDoc(service *cloudantv1.CloudantV1, dbName string, docId string) {
+	document := FindDocument(service, dbName, docId)
+	document.SetProperty("name", "123name")
+
+	putDocumentOptions := service.NewPutDocumentOptions(
+		dbName,
+		docId,
+	)
+	putDocumentOptions.SetDocument(document)
+
+	updateResult, response, err := service.PutDocument(putDocumentOptions)
+	if err != nil {
+		fmt.Println("Response: ", response)
+		panic(err)
+	}
+
+	result, err := json.MarshalIndent(updateResult, "", "  ")
+	fmt.Println("Document Modified: ", string(result))
+}
+
 func main() {
 	fmt.Println("Basic crud operations using GoLang and CloudantDB(CouchDB)")
 	// Cloudant Connection
@@ -213,6 +233,7 @@ func main() {
 
 	ListAllDocs(service, Config.DbName)
 	FindDocument(service, Config.DbName, Config.DbName+":id123")
-	CreateDoc(service, Config.DbName)
-	DeleteDoc(service, Config.DbName, Config.DbName+"7:id123")
+	// CreateDoc(service, Config.DbName)
+	// DeleteDoc(service, Config.DbName, Config.DbName+"7:id123")
+	ModifyDoc(service, Config.DbName, Config.DbName+":id123")
 }

@@ -139,11 +139,11 @@ func FindDocument(service *cloudantv1.CloudantV1, dbName string, docId string) *
 	return document
 }
 
-func CreateDoc(service *cloudantv1.CloudantV1, dbName string) {
+func CreateDoc(service *cloudantv1.CloudantV1, dbName string, documentName string) {
 	newDoc := cloudantv1.Document{
 		ID: core.StringPtr(dbName + "7:id123"),
 	}
-	newDoc.SetProperty("name", "name123")
+	newDoc.SetProperty("name", documentName)
 
 	postDocumentOptions := service.NewPostDocumentOptions(
 		dbName,
@@ -189,7 +189,10 @@ func DeleteDoc(service *cloudantv1.CloudantV1, dbName string, docId string) {
 
 func ModifyDoc(service *cloudantv1.CloudantV1, dbName string, docId string) {
 	document := FindDocument(service, dbName, docId)
-	document.SetProperty("name", "123name")
+	var updatedName string
+	fmt.Print("Enter updatedName: ")
+	fmt.Scan(&updatedName)
+	document.SetProperty("name", updatedName)
 
 	putDocumentOptions := service.NewPutDocumentOptions(
 		dbName,
@@ -205,6 +208,59 @@ func ModifyDoc(service *cloudantv1.CloudantV1, dbName string, docId string) {
 
 	result, err := json.MarshalIndent(updateResult, "", "  ")
 	fmt.Println("Document Modified: ", string(result))
+}
+
+func UserMenu(service *cloudantv1.CloudantV1) {
+
+	var operationSelected int
+	for true {
+		fmt.Println("-------------------------- Welcome To Cloudant CRUDs --------------------------")
+		fmt.Println("1. GetDBDetails")
+		fmt.Println("2. ListAllDocs")
+		fmt.Println("3. FindDocument")
+		fmt.Println("4. CreateDoc")
+		fmt.Println("5. ModifyDoc")
+		fmt.Println("6. DeleteDoc")
+		fmt.Println("7. Exit")
+		fmt.Scan(&operationSelected)
+
+		switch operationSelected {
+		case 1:
+			GetDBDetails(service, Config.DbName)
+			break
+		case 2:
+			ListAllDocs(service, Config.DbName)
+			break
+		case 3:
+			var docId string
+			fmt.Print("Enter docId: ")
+			fmt.Scan(&docId)
+			FindDocument(service, Config.DbName, docId)
+			break
+		case 4:
+			var documentName string
+			fmt.Print("Enter name: ")
+			fmt.Scan(&documentName)
+			CreateDoc(service, Config.DbName, documentName)
+			break
+		case 5:
+			var docId string
+			fmt.Print("Enter docId: ")
+			fmt.Scan(&docId)
+			ModifyDoc(service, Config.DbName, docId)
+			break
+		case 6:
+			var docId string
+			fmt.Print("Enter docId: ")
+			fmt.Scan(&docId)
+			DeleteDoc(service, Config.DbName, docId)
+			break
+		case 7:
+			return
+		default:
+			fmt.Println("Please provide a valid input")
+		}
+	}
 }
 
 func main() {
@@ -227,13 +283,14 @@ func main() {
 	fmt.Println("Connection to Cloudant is established!!")
 
 	GetServerInfo(service)
-	ListDBs(service)
-	GetDBDetails(service, Config.DbName)
-	GetDBChangeInfo(service, Config.DbName) // may use later
+	UserMenu(service)
+	// ListDBs(service)
+	// GetDBDetails(service, Config.DbName)
+	// GetDBChangeInfo(service, Config.DbName) // may use later
 
-	ListAllDocs(service, Config.DbName)
-	FindDocument(service, Config.DbName, Config.DbName+":id123")
+	// ListAllDocs(service, Config.DbName)
+	// FindDocument(service, Config.DbName, Config.DbName+":id123")
 	// CreateDoc(service, Config.DbName)
 	// DeleteDoc(service, Config.DbName, Config.DbName+"7:id123")
-	ModifyDoc(service, Config.DbName, Config.DbName+":id123")
+	// ModifyDoc(service, Config.DbName, Config.DbName+":id123")
 }

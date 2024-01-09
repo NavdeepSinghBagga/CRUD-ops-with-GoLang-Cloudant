@@ -3,7 +3,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"net/http"
+	"time"
 
 	"github.com/IBM/cloudant-go-sdk/cloudantv1"
 	"github.com/IBM/go-sdk-core/core"
@@ -148,9 +150,10 @@ func FindDocument(service *cloudantv1.CloudantV1, dbName string, docId string) *
 
 func CreateDoc(service *cloudantv1.CloudantV1, dbName string, documentName string) {
 	fmt.Println("CreateDoc")
-
+	seed := rand.NewSource(time.Now().UnixNano())
+	randomNumber := rand.New(seed)
 	newDoc := cloudantv1.Document{
-		ID: core.StringPtr(dbName + "7:id123"),
+		ID: core.StringPtr(dbName + ":" + fmt.Sprint(randomNumber.Int())),
 	}
 	newDoc.SetProperty("name", documentName)
 

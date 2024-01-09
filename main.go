@@ -11,6 +11,7 @@ import (
 )
 
 func GetServerInfo(service *cloudantv1.CloudantV1) {
+	fmt.Println("GetServerInfo")
 	getServerInformationOptions := service.NewGetServerInformationOptions()
 
 	serverInformation, response, err := service.GetServerInformation(getServerInformationOptions)
@@ -27,6 +28,7 @@ func GetServerInfo(service *cloudantv1.CloudantV1) {
 }
 
 func ListDBs(service *cloudantv1.CloudantV1) {
+	fmt.Println("ListDBs")
 	getAllDbsOptions := service.NewGetAllDbsOptions()
 
 	dbList, response, err := service.GetAllDbs(getAllDbsOptions)
@@ -43,6 +45,7 @@ func ListDBs(service *cloudantv1.CloudantV1) {
 }
 
 func CreateDB(service *cloudantv1.CloudantV1, dbName string) {
+	fmt.Println("CreateDB")
 	putDatabaseOptions := service.NewPutDatabaseOptions(
 		dbName,
 	)
@@ -63,6 +66,7 @@ func CreateDB(service *cloudantv1.CloudantV1, dbName string) {
 }
 
 func GetDBDetails(service *cloudantv1.CloudantV1, dbName string) {
+	fmt.Println("GetDBDetails")
 	getDatabaseInformationOptions := service.NewGetDatabaseInformationOptions(
 		dbName,
 	)
@@ -87,6 +91,7 @@ func GetDBDetails(service *cloudantv1.CloudantV1, dbName string) {
 }
 
 func GetDBChangeInfo(service *cloudantv1.CloudantV1, dbName string) {
+	fmt.Println("GetDBChangeInfo")
 	postChangesOptions := service.NewPostChangesOptions(
 		dbName,
 	)
@@ -106,6 +111,7 @@ func GetDBChangeInfo(service *cloudantv1.CloudantV1, dbName string) {
 }
 
 func ListAllDocs(service *cloudantv1.CloudantV1, dbName string) {
+	fmt.Println("ListAllDocs")
 	postAllDocsOptions := service.NewPostAllDocsOptions(
 		dbName,
 	)
@@ -123,6 +129,7 @@ func ListAllDocs(service *cloudantv1.CloudantV1, dbName string) {
 }
 
 func FindDocument(service *cloudantv1.CloudantV1, dbName string, docId string) *cloudantv1.Document {
+	fmt.Println("FindDocument")
 	getDocumentOptions := service.NewGetDocumentOptions(
 		dbName,
 		docId,
@@ -140,6 +147,8 @@ func FindDocument(service *cloudantv1.CloudantV1, dbName string, docId string) *
 }
 
 func CreateDoc(service *cloudantv1.CloudantV1, dbName string, documentName string) {
+	fmt.Println("CreateDoc")
+
 	newDoc := cloudantv1.Document{
 		ID: core.StringPtr(dbName + "7:id123"),
 	}
@@ -188,6 +197,7 @@ func DeleteDoc(service *cloudantv1.CloudantV1, dbName string, docId string) {
 }
 
 func ModifyDoc(service *cloudantv1.CloudantV1, dbName string, docId string) {
+	fmt.Println("ModifyDoc")
 	document := FindDocument(service, dbName, docId)
 	var updatedName string
 	fmt.Print("Enter updatedName: ")
@@ -213,7 +223,7 @@ func ModifyDoc(service *cloudantv1.CloudantV1, dbName string, docId string) {
 func UserMenu(service *cloudantv1.CloudantV1) {
 
 	var operationSelected int
-	for true {
+	for {
 		fmt.Println("-------------------------- Welcome To Cloudant CRUDs --------------------------")
 		fmt.Println("1. GetDBDetails")
 		fmt.Println("2. ListAllDocs")
@@ -227,34 +237,28 @@ func UserMenu(service *cloudantv1.CloudantV1) {
 		switch operationSelected {
 		case 1:
 			GetDBDetails(service, Config.DbName)
-			break
 		case 2:
 			ListAllDocs(service, Config.DbName)
-			break
 		case 3:
 			var docId string
 			fmt.Print("Enter docId: ")
 			fmt.Scan(&docId)
 			FindDocument(service, Config.DbName, docId)
-			break
 		case 4:
 			var documentName string
 			fmt.Print("Enter name: ")
 			fmt.Scan(&documentName)
 			CreateDoc(service, Config.DbName, documentName)
-			break
 		case 5:
 			var docId string
 			fmt.Print("Enter docId: ")
 			fmt.Scan(&docId)
 			ModifyDoc(service, Config.DbName, docId)
-			break
 		case 6:
 			var docId string
 			fmt.Print("Enter docId: ")
 			fmt.Scan(&docId)
 			DeleteDoc(service, Config.DbName, docId)
-			break
 		case 7:
 			return
 		default:
@@ -284,13 +288,4 @@ func main() {
 
 	GetServerInfo(service)
 	UserMenu(service)
-	// ListDBs(service)
-	// GetDBDetails(service, Config.DbName)
-	// GetDBChangeInfo(service, Config.DbName) // may use later
-
-	// ListAllDocs(service, Config.DbName)
-	// FindDocument(service, Config.DbName, Config.DbName+":id123")
-	// CreateDoc(service, Config.DbName)
-	// DeleteDoc(service, Config.DbName, Config.DbName+"7:id123")
-	// ModifyDoc(service, Config.DbName, Config.DbName+":id123")
 }

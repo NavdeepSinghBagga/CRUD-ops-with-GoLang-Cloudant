@@ -127,6 +127,9 @@ func ListAllDocs(service *cloudantv1.CloudantV1, dbName string) {
 	}
 
 	result, err := json.MarshalIndent(allDocsResult, "", "  ")
+	if err != nil {
+		panic(err)
+	}
 	fmt.Println("All Documents: ", string(result))
 }
 
@@ -144,6 +147,9 @@ func FindDocument(service *cloudantv1.CloudantV1, dbName string, docId string) *
 	}
 
 	result, err := json.MarshalIndent(document, "", "  ")
+	if err != nil {
+		panic(err)
+	}
 	fmt.Println("Document Found: ", string(result))
 	return document
 }
@@ -220,7 +226,28 @@ func ModifyDoc(service *cloudantv1.CloudantV1, dbName string, docId string) {
 	}
 
 	result, err := json.MarshalIndent(updateResult, "", "  ")
+	if err != nil {
+		panic(err)
+	}
 	fmt.Println("Document Modified: ", string(result))
+}
+
+func RequesHeaderProcess(service *cloudantv1.CloudantV1, dbName string, docId string) {
+	fmt.Println("RequesHeaderProcess")
+	FindDocument(service, dbName, docId)
+	headDocumentOptions := service.NewHeadDocumentOptions(
+		dbName,
+		docId,
+	)
+
+	response, err := service.HeadDocument(headDocumentOptions)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Response Status Code: ", response.StatusCode)
+	fmt.Println("Response Headers: ", response.Headers)
+	fmt.Println("Response Headers Etag:", response.Headers["Etag"])
 }
 
 func UserMenu(service *cloudantv1.CloudantV1) {
@@ -234,7 +261,8 @@ func UserMenu(service *cloudantv1.CloudantV1) {
 		fmt.Println("4. CreateDoc")
 		fmt.Println("5. ModifyDoc")
 		fmt.Println("6. DeleteDoc")
-		fmt.Println("7. Exit")
+		fmt.Println("7. HTTP Response")
+		fmt.Println("8. Exit")
 		fmt.Scan(&operationSelected)
 
 		switch operationSelected {
@@ -263,6 +291,11 @@ func UserMenu(service *cloudantv1.CloudantV1) {
 			fmt.Scan(&docId)
 			DeleteDoc(service, Config.DbName, docId)
 		case 7:
+			var docId string
+			fmt.Print("Enter docId: ")
+			fmt.Scan(&docId)
+			RequesHeaderProcess(service, Config.DbName, docId)
+		case 8:
 			return
 		default:
 			fmt.Println("Please provide a valid input")

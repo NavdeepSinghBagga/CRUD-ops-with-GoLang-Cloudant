@@ -154,12 +154,24 @@ func FindDocument(service *cloudantv1.CloudantV1, dbName string, docId string) *
 	return document
 }
 
-func CreateDoc(service *cloudantv1.CloudantV1, dbName string, documentName string) {
+func CreateDoc(service *cloudantv1.CloudantV1, dbName string) {
 	fmt.Println("CreateDoc")
+
+	// enter partition
+	var partition string
+	fmt.Print("Enter partition: ")
+	fmt.Scan(&partition)
+
 	seed := rand.NewSource(time.Now().UnixNano())
 	randomNumber := rand.New(seed)
+
+	// get document details
+	var documentName string
+	fmt.Print("Enter document name: ")
+	fmt.Scan(&documentName)
+
 	newDoc := cloudantv1.Document{
-		ID: core.StringPtr(dbName + ":" + fmt.Sprint(randomNumber.Int())),
+		ID: core.StringPtr(partition + ":" + fmt.Sprint(randomNumber.Int())),
 	}
 	newDoc.SetProperty("name", documentName)
 
@@ -298,10 +310,7 @@ func UserMenu(service *cloudantv1.CloudantV1) {
 			fmt.Scan(&docId)
 			FindDocument(service, Config.DbName, docId)
 		case 4:
-			var documentName string
-			fmt.Print("Enter name: ")
-			fmt.Scan(&documentName)
-			CreateDoc(service, Config.DbName, documentName)
+			CreateDoc(service, Config.DbName)
 		case 5:
 			var docId string
 			fmt.Print("Enter docId: ")

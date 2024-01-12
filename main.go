@@ -250,6 +250,27 @@ func RequesHeaderProcess(service *cloudantv1.CloudantV1, dbName string, docId st
 	fmt.Println("Response Headers Etag:", response.Headers["Etag"])
 }
 
+func GetPartitionInfo(service *cloudantv1.CloudantV1, dbName string, partition string) {
+	fmt.Println("GetPartitionInfo")
+	getPartitionInformationOptions := service.NewGetPartitionInformationOptions(
+		dbName,
+		partition,
+	)
+
+	partitionInformation, response, err := service.GetPartitionInformation(getPartitionInformationOptions)
+	if err != nil {
+		fmt.Println("Response: ", response)
+		panic(err)
+	}
+
+	result, err := json.MarshalIndent(partitionInformation, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Partition Info: ", string(result))
+
+}
+
 func UserMenu(service *cloudantv1.CloudantV1) {
 
 	var operationSelected int
@@ -262,7 +283,8 @@ func UserMenu(service *cloudantv1.CloudantV1) {
 		fmt.Println("5. ModifyDoc")
 		fmt.Println("6. DeleteDoc")
 		fmt.Println("7. HTTP Response")
-		fmt.Println("8. Exit")
+		fmt.Println("8. Get DB Partition Info")
+		fmt.Println("9. Exit")
 		fmt.Scan(&operationSelected)
 
 		switch operationSelected {
@@ -296,6 +318,11 @@ func UserMenu(service *cloudantv1.CloudantV1) {
 			fmt.Scan(&docId)
 			RequesHeaderProcess(service, Config.DbName, docId)
 		case 8:
+			var partition string
+			fmt.Print("Enter Partition: ")
+			fmt.Scan(&partition)
+			GetPartitionInfo(service, Config.DbName, partition)
+		case 9:
 			return
 		default:
 			fmt.Println("Please provide a valid input")

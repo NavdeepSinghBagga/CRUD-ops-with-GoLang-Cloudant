@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"time"
@@ -283,6 +285,39 @@ func GetPartitionInfo(service *cloudantv1.CloudantV1, dbName string, partition s
 
 }
 
+func AddAttachment(service *cloudantv1.CloudantV1, dbName string, docId string) {
+	fmt.Println("AddAttachment")
+	// check if doc is present
+	document := FindDocument(service, dbName, docId)
+
+	// enter the attachment
+	var attachmentText string
+	fmt.Print("Enter attachmentText: ")
+	fmt.Scan(&attachmentText)
+
+	putAttachmentOptions := service.NewPutAttachmentOptions(
+		dbName,
+		docId,
+		"attachment.txt", // attachment file name
+		ioutil.NopCloser(
+			bytes.NewReader([]byte(attachmentText)),
+		),
+		"text/plain",
+	)
+	putAttachmentOptions.SetRev(*document.Rev) // set rev to avoid conflict
+	documentResult, response, err := service.PutAttachment(putAttachmentOptions)
+	if err != nil {
+		fmt.Println("Response: ", response)
+		panic(err)
+	}
+
+	result, err := json.MarshalIndent(documentResult, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Attachment added: ", string(result))
+}
+
 func UserMenu(service *cloudantv1.CloudantV1) {
 
 	var operationSelected int
@@ -296,7 +331,8 @@ func UserMenu(service *cloudantv1.CloudantV1) {
 		fmt.Println("6. DeleteDoc")
 		fmt.Println("7. HTTP Response")
 		fmt.Println("8. Get DB Partition Info")
-		fmt.Println("9. Exit")
+		fmt.Println("9. Add Attachment to existing Doc")
+		fmt.Println("10. Exit")
 		fmt.Scan(&operationSelected)
 
 		switch operationSelected {
@@ -332,6 +368,11 @@ func UserMenu(service *cloudantv1.CloudantV1) {
 			fmt.Scan(&partition)
 			GetPartitionInfo(service, Config.DbName, partition)
 		case 9:
+			var docId string
+			fmt.Print("Enter docId: ")
+			fmt.Scan(&docId)
+			AddAttachment(service, Config.DbName, docId)
+		case 10:
 			return
 		default:
 			fmt.Println("Please provide a valid input")

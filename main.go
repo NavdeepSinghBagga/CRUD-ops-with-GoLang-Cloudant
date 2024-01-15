@@ -380,8 +380,7 @@ func UserMenu(service *cloudantv1.CloudantV1) {
 	}
 }
 
-func main() {
-	fmt.Println("Basic crud operations using GoLang and CloudantDB(CouchDB)")
+func CreateConnection() *cloudantv1.CloudantV1 {
 	// Cloudant Connection
 	authenticator := &core.IamAuthenticator{
 		ApiKey: Config.ApiKey,
@@ -398,6 +397,13 @@ func main() {
 		panic(err)
 	}
 	fmt.Println("Connection to Cloudant is established!!")
+	return service
+}
+func main() {
+	fmt.Println("Basic crud operations using GoLang and CloudantDB(CouchDB)")
+
+	// create cloudant connection with auth credentials
+	service := CreateConnection()
 
 	GetServerInfo(service)
 	UserMenu(service)
